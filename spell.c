@@ -79,6 +79,15 @@ bool check_word(const char* word, hashmap_t hashtable[])
 	return FALSE;
     }
 
+    // check if input word is not made of ascii chars - if so, 
+    // return FALSE;
+    //
+    // check if word is all digits - 
+    // return TRUE
+    //
+    // check if first and/or last char is a punctuation mark - if so, chop the end with punc
+    // and then check for the word below
+
     int bucket = hash_function(word);
     if ((bucket < 0) || (bucket >= HASH_SIZE)){
        printf("hash_function returned an illegal index [%d] for input word [%s]\n",bucket, word);
@@ -87,15 +96,15 @@ bool check_word(const char* word, hashmap_t hashtable[])
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
-        if (strcmp(word,cursor->word)
+        if (strcmp(word,cursor->word) == 0)
 	    return TRUE;
 	cursor = cursor->next;
     }
 
     // check dict hashmap for lowercase word from input file - that's acceptable
-    int bucket = hash_function(tolower(word));
+    int bucket = hash_function(strlwr(word));
     if ((bucket < 0) || (bucket >= HASH_SIZE)){
-       printf("hash_function returned an illegal index [%d] for lowercase input word [%s]\n",bucket, tolower(word));
+       printf("hash_function returned an illegal index [%d] for lowercase input word [%s]\n",bucket, strlwr(word));
        return FALSE;
     }
 

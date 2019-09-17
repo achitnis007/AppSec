@@ -71,6 +71,11 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
  **/
 bool check_word(const char* word, hashmap_t hashtable[])
 {
+    int alpha_cnt = 0, num_cnt = 0;
+    char chkword[LENGTH+1], chkword_lower[LENGTH+1];
+
+ 
+    // cursor points to the current node of the selected hashtable bucket linked list
     hashmap_t cursor = NULL;
     
     int word_len = strlen(word);
@@ -79,38 +84,65 @@ bool check_word(const char* word, hashmap_t hashtable[])
 	return FALSE;
     }
 
-    // check if input word is not made of ascii chars - if so, 
-    // return FALSE;
-    //
-    // check if word is all digits - 
-    // return TRUE
-    //
-    // check if first and/or last char is a punctuation mark - if so, chop the end with punc
-    // and then check for the word below
+    // count alpha & numeric chars 
+    for (int i=0; i<word_len; i++){
+        if (word[i] >= 'A' && word[i] <= 'Z' || word[i] >= 'a' && word[i] <= 'z'){
+	    alpha_cnt++;
+	}
+	else if (word[i] >= '0' && word[i] <= '9'){
+	    num_cnt++;
+	}
+	else if (word[i] < 32 || word[i] == 127){
+	    return FALSE;
+	}
+    }
 
-    int bucket = hash_function(word);
+    // word is a number - passes spell check automatically
+    if (num_cnt == word_len)
+        return TRUE;
+
+    // word is made of alphabets - copy to chkword for dir lookup
+    if (alpha_cnt == word_len)
+	strcpy(chkword, word);
+
+    // check if first char is a punctuation mark - if so, copy from 2nd char to end
+    // else copy the entire word to chkword
+    if ( (word[0] >= 33 && word[0] <= 47) || (word[0] >= 91 && word[0] <= 96) || (word[0] >= 123 && word[0] <= 126) )
+	strcpy(chkword, word+1);
+    else
+	strcpy(chkword, word);
+
+    // if the last char of word is punc, truncate chkword string to eliminate the last punc mark
+    if ( (word[word_len-1] >= 33 && word[word_len-1] <= 47) || (word[word_len-1] >= 91 && word[word_len-1] <= 96) || (word[word_len-1] >= 123 && word[word_len-1] <= 126) ){
+	int chkword_len = strlen(chkword);
+	chkword[chkword_len-1] = '\0';  // truncate last char of chkword since it's a punc
+    }
+
+    int bucket = hash_function(chkword);
     if ((bucket < 0) || (bucket >= HASH_SIZE)){
-       printf("hash_function returned an illegal index [%d] for input word [%s]\n",bucket, word);
+       printf("hash_function returned an illegal index [%d] for input word [%s]\n",bucket, chkword);
        return FALSE;
     }
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
-        if (strcmp(word,cursor->word) == 0)
+        if (strcmp(chkword,cursor->word) == 0)
 	    return TRUE;
 	cursor = cursor->next;
     }
 
-    // check dict hashmap for lowercase word from input file - that's acceptable
-    int bucket = hash_function(strlwr(word));
+    // word (minus puncs at beginning and end) did not pas muster - try lowercase version
+    chkword_lower = strlwr(chkword);
+
+    int bucket = hash_function(chkword_lower);
     if ((bucket < 0) || (bucket >= HASH_SIZE)){
-       printf("hash_function returned an illegal index [%d] for lowercase input word [%s]\n",bucket, strlwr(word));
+       printf("hash_function returned an illegal index [%d] for lowercase input word [%s]\n",bucket, chkword_lower);
        return FALSE;
     }
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
-        if (strcmp(word,cursor->word)
+        if (strcmp(chkword_lower,cursor->word)
 	    return TRUE;
 	cursor = cursor->next;
     }

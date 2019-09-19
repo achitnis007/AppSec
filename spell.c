@@ -53,10 +53,10 @@
 int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
 {
     char line[LINEBUFF];
-    char *ip_word;
+    char* ip_word;
     int num_misspelled = 0;
     
-    misspelled = (char *) malloc(MAX_MISSPELLED * sizeof(char *));
+    misspelled = (char* *) malloc(MAX_MISSPELLED * sizeof(char *));
     if (misspelled == NULL){
         // initialize all string pointers to NULL
 	for (int i=0; i < MAX_MISSPELLED; i++){
@@ -66,7 +66,7 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     else
         exit(1);
 
-    while (fgets(line, LINEBUFF, fp) ! = NULL){
+    while (fgets(line, LINEBUFF, fp) != NULL){
         ip_word = strtok(line, " ");
 	while (ip_word != NULL){
             ip_word = strtok(NULL, " ");
@@ -117,7 +117,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 
     // count alpha & numeric chars 
     for (int i=0; i<word_len; i++){
-        if (word[i] >= 'A' && word[i] <= 'Z' || word[i] >= 'a' && word[i] <= 'z'){
+        if ((word[i] >= 'A' && word[i] <= 'Z') || (word[i] >= 'a' && word[i] <= 'z')){
 	    alpha_cnt++;
 	}
 	else if (word[i] >= '0' && word[i] <= '9'){
@@ -128,7 +128,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 	    if (i == word_len-1) punct_end = TRUE;
 	    punct_cnt++;
 	}
-	else if (word[i] < 32 || word[i] == 127){
+	else if ((word[i] < 32) || (word[i] == 127)){
 	    return FALSE;
 	}
     }
@@ -169,9 +169,11 @@ bool check_word(const char* word, hashmap_t hashtable[])
     }
 
     // word (minus puncs at beginning and end) did not pas muster - try lowercase version
-    chkword_lower = strlwr(chkword);
+    for (int i=0; i < strlen(chkword); i++) {
+	chkword_lower[i] = tolower(chkword[i]);
+    }
 
-    int bucket = hash_function(chkword_lower);
+    bucket = hash_function(chkword_lower);
     if ((bucket < 0) || (bucket >= HASH_SIZE)){
        printf("hash_function returned an illegal index [%d] for lowercase input word [%s]\n",bucket, chkword_lower);
        return FALSE;
@@ -179,7 +181,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
-        if (strcmp(chkword_lower,cursor->word)
+        if (strcmp(chkword_lower,cursor->word))
 	    return TRUE;
 	cursor = cursor->next;
     }
@@ -217,12 +219,12 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	return FALSE;
     }
 
-    if (sizeof(hashtable) <= 0){
-	printf("Size of hashtable passed in has zero length\n");
-	// allocate space for 2000 node* and initialize passed in hashtable
-	hashtable = malloc(sizeof(node*) * HASH_SIZE);
-	return FALSE;
-    }
+    int hashtable_size =  sizeof (hashtable) / sizeof (hashmap_t);
+    printf("hashtable passed in has [%d] buckets\n", hashtable_size);
+    
+    // allocate space for 2000 node* and initialize passed in hashtable
+    if (hashtable_size <= 0)
+	hashtable = malloc(sizeof(node *) * HASH_SIZE);
 
     // initialize hashtable - array of linked lists to NULL
     for (int i=0; i<HASH_SIZE; i++){
@@ -234,8 +236,8 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	node* new_node_p = malloc(sizeof(node));
 
 	// initialize the new node with word read from dict
-	new_node_p->word = str;
-	new_node_p->next = NULL
+	strcpy(new_node_p->word, str);
+	new_node_p->next = NULL;
 
 	// find the bucket id for the word using hash_function
 	int bucket = hash_function(str); 
@@ -264,6 +266,8 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
  **/
 // int hash_function(const char* word);
 
+/* ******************* moved to main.c **********************************
+ * **********************************************************************
 int main(int argc, char** argv)
 {
     // declare hashtable_t hashtable[]
@@ -293,3 +297,4 @@ int main(int argc, char** argv)
 
     exit(0);
 }
+**************************************************************************/

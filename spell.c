@@ -219,12 +219,8 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	return FALSE;
     }
 
-    int hashtable_size =  sizeof (hashtable) / sizeof (hashmap_t);
-    printf("hashtable passed in has [%d] buckets\n", hashtable_size);
-    
     // allocate space for 2000 node* and initialize passed in hashtable
-    if (hashtable_size <= 0)
-	hashtable = malloc(sizeof(node *) * HASH_SIZE);
+    hashtable = malloc(sizeof(node *) * HASH_SIZE);
 
     // initialize hashtable - array of linked lists to NULL
     for (int i=0; i<HASH_SIZE; i++){

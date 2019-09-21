@@ -15,8 +15,8 @@
 
 #define LINEBUFF 2048
 
-// #define MY_TESTING_ON
-// #undef MY_TESTING_ON
+#define MY_TESTING_ON
+//#undef MY_TESTING_ON
 
 // in dictionary.h
 // maximum length for a word
@@ -99,9 +99,17 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
 	while (ip_word != NULL){
             if (!check_word(ip_word, hashtable)) {
             // malloc space for this word and add to misspelled array    
-		misspelled[num_misspelled] = (char *) malloc((strlen(ip_word)+1));
-		strcpy(misspelled[num_misspelled], ip_word);
-		num_misspelled++;
+		misspelled[num_misspelled] = (char *) malloc(strlen(ip_word)+1);
+		// strcpy(misspelled[num_misspelled], ip_word);
+		if ((strncpy(misspelled[num_misspelled], ip_word, strlen(ip_word)+1)) != NULL){
+                    #ifdef MY_TESTING_ON
+		    printf("Input Word [%s] has length [%d]\n", ip_word, (int) strlen(ip_word));
+		    printf("misspelled[%d] is [%s] has length [%d]\n", num_misspelled, misspelled[num_misspelled], (int) strlen(misspelled[num_misspelled]));
+                    #endif
+		    num_misspelled++;
+		}
+		else
+                    exit(1);
             }
 	    ip_word = strtok(NULL, " \t\r\n\v\f");
 	}
@@ -152,10 +160,23 @@ bool check_word(const char* word, hashmap_t hashtable[])
     #endif
 
     if (word_len > LENGTH){
-        #ifdef MY_TESTING_ON
-        printf("Word being checked [%s] has [%d] chars - exceeds max word length of [%d]\n",word, word_len, LENGTH);
-        #endif
-	return FALSE;
+        for (int i=0; i<word_len; i++){
+            if (word[i] >= '0' && word[i] <= '9'){
+                num_cnt++;
+	    }
+        }
+	if (num_cnt == word_len){
+            #ifdef MY_TESTING_ON
+            printf("Word being checked [%s] has [%d] chars - spellcheck passed since it's numeric\n",word, word_len);
+            #endif
+	    return TRUE;
+	}
+	else{
+            #ifdef MY_TESTING_ON
+            printf("Word being checked [%s] has [%d] chars - exceeds max word length of [%d]\n",word, word_len, LENGTH);
+            #endif
+	    return FALSE;
+	}
     }
 
     // count alpha & numeric chars 
@@ -186,14 +207,17 @@ bool check_word(const char* word, hashmap_t hashtable[])
 
     // word is made of alphabets - copy to chkword for dir lookup
     if (alpha_cnt == word_len)
-	strcpy(chkword, word);
+	// strcpy(chkword, word);
+	strncpy(chkword, word, (int) sizeof(chkword));
 
     // check if first char is a punctuation mark - if so, copy from 2nd char to end
     // else copy the entire word to chkword
     if (punct_begin)
-	strcpy(chkword, word+1);
+	// strcpy(chkword, word+1);
+	strncpy(chkword, word+1, (int) sizeof(chkword));
     else
-	strcpy(chkword, word);
+	// strcpy(chkword, word);
+	strncpy(chkword, word, (int) sizeof(chkword));
 
     // if the last char of word is punc, truncate chkword string to eliminate the last punc mark
     if (punct_end){
@@ -225,11 +249,14 @@ bool check_word(const char* word, hashmap_t hashtable[])
         #ifdef MY_TESTING_ON
 	printf("input word [%s], dict word at bucket # [%d] is [%s]\n", chkword, bucket, cursor->word);
         #endif
-        if (!strcmp(chkword,cursor->word)){
-            #ifdef MY_TESTING_ON
-            printf("[%s] found in dict - correctly spelled\n", chkword);
-            #endif
-            return TRUE;
+        // if (!strcmp(chkword,cursor->word)){
+        if (!strncmp(chkword, cursor->word, strlen(cursor->word))){
+	    if (strlen(chkword) == strlen(cursor->word)){
+                #ifdef MY_TESTING_ON
+                printf("Input Word [%s] found in dict [%s] - correctly spelled\n", chkword, cursor->word);
+                #endif
+                return TRUE;
+	    }
 	}
 	cursor = cursor->next;
     }
@@ -252,11 +279,14 @@ bool check_word(const char* word, hashmap_t hashtable[])
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
-        if (!strcmp(chkword_lower,cursor->word)) {
-            #ifdef MY_TESTING_ON
-	    printf("[%s] found in dict - correctly spelled\n", chkword_lower);			
-            #endif
-	    return TRUE;
+        // if (!strcmp(chkword_lower,cursor->word)) {
+        if (!strncmp(chkword_lower, cursor->word, strlen(cursor->word))){
+	    if (strlen(chkword_lower) == strlen(cursor->word)){
+                #ifdef MY_TESTING_ON
+                printf("Input Word [%s] in lower case [%s] found in dict [%s] - correctly spelled\n", chkword, chkword_lower, cursor->word);
+                #endif
+                return TRUE;
+	    }
 	}
 	cursor = cursor->next;
     }
@@ -331,7 +361,8 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	node* new_node_p = (node *) malloc(sizeof(node));
 
 	// initialize the new node with word read from dict
-	strcpy(new_node_p->word, str);
+	// strcpy(new_node_p->word, str);
+	strncpy(new_node_p->word, str, (int) sizeof(new_node_p->word));
 	new_node_p->next = NULL;
 
 	// find the bucket id for the word using hash_function

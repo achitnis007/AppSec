@@ -1,1 +1,10 @@
 Take a sad sogn and make it better. Remember to let her under your skyn, then you begin to make it betta.
+Hi, this is Abhijit - Testing multiple input "lines" in the input FILE.
+
+One Two Three Four Fivee Seex Seben eight nine 1234567890 1a2b3c4d ""!@#$$%^^&&** 
+abcdefghijklmnopqrstuvwxyz
+
+123456789012345678901234567890123456789012345
+1234567890123456789012345678901234567890123456
+
+abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrstuvwxyz

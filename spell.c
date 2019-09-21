@@ -15,6 +15,9 @@
 
 #define LINEBUFF 2048
 
+// #define MY_TESTING_ON
+// #undef MY_TESTING_ON
+
 // in dictionary.h
 // maximum length for a word
 // (e.g., pneumonoultramicroscopicsilicovolcanoconiosis)
@@ -55,54 +58,63 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     char line[LINEBUFF];
     char* ip_word;
     int num_misspelled = 0;
-	int i=0;
-	hashmap_t cur = NULL;
     
-	// print hashtable i.e. dictionary
-	printf("Printing dictionary from check_words() function\n");
-	while (hashtable[i] != NULL){
-		cur = hashtable[i]->next;
-		printf("\nBucket [%d] - dict word(s) [%s], ", i, hashtable[i]->word);
-		while (cur != NULL){
-			printf("[%s], ", cur->word );
-			cur = cur->next;
-		}
-		i++;
+    #ifdef MY_TESTING_ON
+    int i=0;
+    hashmap_t cur = NULL;
+    // print hashtable i.e. dictionary
+    #ifdef MY_TESTING_ON
+    printf("Printing dictionary from check_words() function\n");
+    #endif
+    while (hashtable[i] != NULL){
+        cur = hashtable[i]->next;
+        #ifdef MY_TESTING_ON
+        printf("\nBucket [%d] - dict word(s) [%s], ", i, hashtable[i]->word);
+        #endif
+	while (cur != NULL){
+            #ifdef MY_TESTING_ON
+	    printf("[%s], ", cur->word );
+            #endif
+	    cur = cur->next;
 	}
+	i++;
+    }
+    #endif
 	
-	/*********
+/*********
     misspelled = (char* *) malloc(MAX_MISSPELLED * sizeof(char *));
     if (misspelled != NULL){
         // initialize all string pointers to NULL
-		for (int i=0; i < MAX_MISSPELLED; i++){
-			misspelled[i] = NULL;
-		}
+	for (int i=0; i < MAX_MISSPELLED; i++){
+		misspelled[i] = NULL;
+	}
     }
     else {
         exit(1);
-	}
-	**********/
+    }
+**********/
 	
     while (fgets(line, LINEBUFF, fp) != NULL){
         ip_word = strtok(line, " \t\r\n");
-		while (ip_word != NULL){
-            // ip_word = strtok(NULL, " \t\r\n");
-			if (!check_word(ip_word, hashtable)) {
-                // malloc space for this word and add to misspelled array    
-				misspelled[num_misspelled] = (char *) malloc((strlen(ip_word)+1));
-				strcpy(misspelled[num_misspelled], ip_word);
-				num_misspelled++;
+	while (ip_word != NULL){
+            if (!check_word(ip_word, hashtable)) {
+            // malloc space for this word and add to misspelled array    
+		misspelled[num_misspelled] = (char *) malloc((strlen(ip_word)+1));
+		strcpy(misspelled[num_misspelled], ip_word);
+		num_misspelled++;
             }
-			ip_word = strtok(NULL, " \t\r\n\v\f");
-		}
+	    ip_word = strtok(NULL, " \t\r\n\v\f");
+	}
     }
 	
-	/********
-	printf("Total misspelled words [%d]\nList of misspelled words\n",num_misspelled);
-	for (int i=0; i < num_misspelled; i++) {
-		printf("[%d]   [%s]\n", i, misspelled[i]);
-	}
-	*********/
+/********
+    #ifdef MY_TESTING_ON
+    printf("Total misspelled words [%d]\nList of misspelled words\n",num_misspelled);
+    for (int i=0; i < num_misspelled; i++) {
+	printf("[%d]   [%s]\n", i, misspelled[i]);
+    }
+    #endif
+*********/
 	
     return num_misspelled;
 }
@@ -130,101 +142,129 @@ bool check_word(const char* word, hashmap_t hashtable[])
     bool punct_begin = FALSE, punct_end = FALSE;
     char chkword[LENGTH+1], chkword_lower[LENGTH+1];
  
+    int word_len = strlen(word);
+
     // cursor points to the current node of the selected hashtable bucket linked list
     hashmap_t cursor = NULL;
     
-	printf("\nword to be spell-checked is [%s]\n", word);
-    int word_len = strlen(word);
+    #ifdef MY_TESTING_ON
+    printf("\nword to be spell-checked is [%s]\n", word);
+    #endif
+
     if (word_len > LENGTH){
+        #ifdef MY_TESTING_ON
         printf("Word being checked [%s] has [%d] chars - exceeds max word length of [%d]\n",word, word_len, LENGTH);
-		return FALSE;
+        #endif
+	return FALSE;
     }
 
     // count alpha & numeric chars 
     for (int i=0; i<word_len; i++){
         if ((word[i] >= 'A' && word[i] <= 'Z') || (word[i] >= 'a' && word[i] <= 'z')){
 	    alpha_cnt++;
-		}
-		else if (word[i] >= '0' && word[i] <= '9'){
-			num_cnt++;
-		}
-		else if (ispunct(word[i])){
-			if (i == 0) punct_begin = TRUE;
-			if (i == word_len-1) punct_end = TRUE;
-		}
-		else if ((word[i] < 32) || (word[i] == 127)){
-			return FALSE;
-		}
+	}
+	else if (word[i] >= '0' && word[i] <= '9'){
+            num_cnt++;
+	}
+	else if (ispunct(word[i])){
+            if ((i==0) && (i==word_len-1)) return TRUE;
+	    if (i == 0) punct_begin = TRUE;
+	    if (i == word_len-1) punct_end = TRUE;
+	}
+	else if ((word[i] < 32) || (word[i] == 127)){
+	    return FALSE;
+	}
     }
 
     // word is a number - passes spell check automatically
     if (num_cnt == word_len) {
-		printf("Word is a numeric string - spell check passed [%s]\n", word);
+        #ifdef MY_TESTING_ON
+	printf("Word is a numeric string - spell check passed [%s]\n", word);
+        #endif
         return TRUE;
-	}
+    }
 
     // word is made of alphabets - copy to chkword for dir lookup
     if (alpha_cnt == word_len)
-		strcpy(chkword, word);
+	strcpy(chkword, word);
 
     // check if first char is a punctuation mark - if so, copy from 2nd char to end
     // else copy the entire word to chkword
     if (punct_begin)
-		strcpy(chkword, word+1);
+	strcpy(chkword, word+1);
     else
-		strcpy(chkword, word);
+	strcpy(chkword, word);
 
     // if the last char of word is punc, truncate chkword string to eliminate the last punc mark
     if (punct_end){
-		int chkword_len = strlen(chkword);
+	int chkword_len = strlen(chkword);
 		
-		// null terminate string
-		chkword[chkword_len-1] = '\0';  
+	// null terminate string
+	chkword[chkword_len-1] = '\0';  
     }
 
-	printf("word to be spell-checked after stripping leading/trailing punct if present is [%s]\n", chkword);
+    #ifdef MY_TESTING_ON
+    printf("word to be spell-checked after stripping leading/trailing punct if present is [%s]\n", chkword);
+    #endif
     
-	int bucket = hash_function(chkword);
+    int bucket = hash_function(chkword);
 	
-	printf("bucket id returned by hash_function is [%d]\n", bucket);	
+    #ifdef MY_TESTING_ON
+    printf("bucket id returned by hash_function is [%d]\n", bucket);	
+    #endif
     
-	if ((bucket < 0) || (bucket >= HASH_SIZE)){
-       printf("hash_function returned an illegal index [%d] for input word [%s]\n",bucket, chkword);
-       return FALSE;
+    if ((bucket < 0) || (bucket >= HASH_SIZE)){
+        #ifdef MY_TESTING_ON
+        printf("hash_function returned an illegal index [%d] for input word [%s]\n",bucket, chkword);
+        #endif
+        return FALSE;
     }
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
-		printf("input word [%s], dict word at bucket # [%d] is [%s]\n", chkword, bucket, cursor->word);
+        #ifdef MY_TESTING_ON
+	printf("input word [%s], dict word at bucket # [%d] is [%s]\n", chkword, bucket, cursor->word);
+        #endif
         if (!strcmp(chkword,cursor->word)){
-			printf("[%s] found in dict - correctly spelled\n", chkword);
-			return TRUE;
-		}
-		cursor = cursor->next;
+            #ifdef MY_TESTING_ON
+            printf("[%s] found in dict - correctly spelled\n", chkword);
+            #endif
+            return TRUE;
+	}
+	cursor = cursor->next;
     }
 
     // word (minus puncs at beginning and end) did not pas muster - try lowercase version
     for (int i=0; i <= strlen(chkword); i++) {
-		chkword_lower[i] = tolower(chkword[i]);
+	chkword_lower[i] = tolower(chkword[i]);
     }
 
-	printf("word to be spell-checked after conv to lowercase is [%s]\n", chkword_lower);
+    #ifdef MY_TESTING_ON
+    printf("word to be spell-checked after conv to lowercase is [%s]\n", chkword_lower);
+    #endif
     bucket = hash_function(chkword_lower);
     if ((bucket < 0) || (bucket >= HASH_SIZE)){
-       printf("hash_function returned an illegal index [%d] for lowercase input word [%s]\n",bucket, chkword_lower);
-       return FALSE;
+        #ifdef MY_TESTING_ON
+        printf("hash_function returned an illegal index [%d] for lowercase input word [%s]\n",bucket, chkword_lower);
+        #endif
+        return FALSE;
     }
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
         if (!strcmp(chkword_lower,cursor->word)) {
-			printf("[%s] found in dict - correctly spelled\n", chkword_lower);			
-			return TRUE;
-		}
-		cursor = cursor->next;
+            #ifdef MY_TESTING_ON
+	    printf("[%s] found in dict - correctly spelled\n", chkword_lower);			
+            #endif
+	    return TRUE;
+	}
+	cursor = cursor->next;
     }
 
-	printf("word to be spell-checked [%s] or [%s] not found in dict - it's misspelled\n", chkword, chkword_lower);
+    #ifdef MY_TESTING_ON
+    printf("word to be spell-checked [%s] or [%s] not found in dict - it's misspelled\n", chkword, chkword_lower);
+    #endif
+
     return FALSE;
 }
 
@@ -254,21 +294,27 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
     
     fp = fopen(dictionary_file, "r");
     if (fp == NULL){
-	printf("Could not open dictionary wordlist file %s\n", dictionary_file);
+        #ifdef MY_TESTING_ON
+        printf("Could not open dictionary wordlist file %s\n", dictionary_file);
+        #endif
 	return FALSE;
     }
-	else{
-		printf("Opened dictionary file [%s] successfully\n", dictionary_file);
-	}
+    else{
+        #ifdef MY_TESTING_ON
+	printf("Opened dictionary file [%s] successfully\n", dictionary_file);
+        #endif
+    }
 
     // allocate space for 2000 node* and initialize passed in hashtable
-	/********
+/********
     hashtable = malloc(sizeof(node *) * HASH_SIZE);
 	if (hashtable == NULL){
-		printf("Malloc to allocate memory for hashtable failed - exiting program\n");
-		exit(1);
+            #ifdef MY_TESTING_ON
+	    printf("Malloc to allocate memory for hashtable failed - exiting program\n");
+            #endif
+	    exit(1);
 	}
-	*********/
+*********/
 	
     // initialize hashtable - array of linked lists to NULL
     for (int i=0; i<HASH_SIZE; i++){
@@ -276,89 +322,60 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
     }
 
     while (fgets(str, LENGTH+1, fp) != NULL){
-		// remove the pesky newline at the end if it exists
-		if ((str[0] != '\0') && (str[strlen(str) -1] == '\n')){
-             str[strlen(str) -1] = '\0';
+	// remove the pesky newline at the end if it exists
+	if ((str[0] != '\0') && (str[strlen(str) -1] == '\n')){
+            str[strlen(str) -1] = '\0';
         }
 		
         // allocate mem for a new node
-		node* new_node_p = (node *) malloc(sizeof(node));
+	node* new_node_p = (node *) malloc(sizeof(node));
 
-		// initialize the new node with word read from dict
-		strcpy(new_node_p->word, str);
-		new_node_p->next = NULL;
+	// initialize the new node with word read from dict
+	strcpy(new_node_p->word, str);
+	new_node_p->next = NULL;
 
-		// find the bucket id for the word using hash_function
-		int bucket = hash_function(str); 
+	// find the bucket id for the word using hash_function
+	int bucket = hash_function(str); 
 		
-		// printf("Dictionary word is [%s] and bucket id is [%d]\n", str, bucket);
-		if ((bucket < 0) || (bucket >= HASH_SIZE)){
-		   printf("hash_function returned an illegal index [%d] for dict word [%s]\n",bucket, str);
-		   return FALSE;
-		}
+        #ifdef MY_TESTING_ON
+	// printf("Dictionary word is [%s] and bucket id is [%d]\n", str, bucket);
+        #endif
+	if ((bucket < 0) || (bucket >= HASH_SIZE)){
+            #ifdef MY_TESTING_ON
+	    printf("hash_function returned an illegal index [%d] for dict word [%s]\n",bucket, str);
+            #endif
+	    return FALSE;
+	}
 
-		if (hashtable[bucket] == NULL){
-			hashtable[bucket] = new_node_p; 
-		}
-		else{
-			new_node_p->next = hashtable[bucket];
-			hashtable[bucket] = new_node_p;
-		}
+	if (hashtable[bucket] == NULL){
+            hashtable[bucket] = new_node_p; 
+	}
+	else{
+	    new_node_p->next = hashtable[bucket];
+	    hashtable[bucket] = new_node_p;
+	}
     }
 
     fclose(fp);
 	
-	printf("Printing dictionary hashtable from load_dictionary() before exiting\n");
-	hashmap_t cur = NULL;
-	int i = 0;
-	while (hashtable[i] != NULL){
-		cur = hashtable[i]->next;
-		printf("\nBucket [%d] - dict word(s) [%s], ", i, hashtable[i]->word);
-		while (cur != NULL){
-			printf("[%s], ", cur->word );
-			cur = cur->next;
-		}
-		i++;
-	}
+    #ifdef MY_TESTING_ON
+    printf("Printing dictionary hashtable from load_dictionary() before exiting\n");
+    #endif
+    hashmap_t cur = NULL;
+    int i = 0;
+    while (hashtable[i] != NULL){
+	cur = hashtable[i]->next;
+        #ifdef MY_TESTING_ON
+	printf("\nBucket [%d] - dict word(s) [%s], ", i, hashtable[i]->word);
+        #endif
+	while (cur != NULL){
+            #ifdef MY_TESTING_ON
+            printf("[%s], ", cur->word );
+            #endif
+            cur = cur->next;
+        }
+	i++;
+    }
 
     return TRUE; 
 }
-
-
-/**
- * Already implemented in dictionary.c
- **/
-// int hash_function(const char* word);
-
-/* ******************* moved to main.c **********************************
- * **********************************************************************
-int main(int argc, char** argv)
-{
-    // declare hashtable_t hashtable[]
-    // declare char *misspelled[] to store misspelled words
-    // open the input file - pass FILE * to check_words
-    // load dictionary
-    // call check_words
-
-    hashtable_t hashtable[HASH_SIZE];
-    char * misspelled[MAX_MISSPELLED];
-    int num_misspelled = 0;
-    char * dictionary_file = "./wordlist.txt";
-
-    fp = fopen("./input_file.txt", "r");
-    if (fp == NULL){
-	printf("Could not open input_file.txt to be spell checked\n");
-	exit(1);
-    }
-
-    if (load_dictionary(dictionary_file, hashtable) == TRUE){
-	num_misspelled = check_words(fp, hashtable, misspelled);
-    }
-    else{
-	printf("Failed to load dictionary file - exiting without checking input file\n"); 
-	exit(1);
-    }
-
-    exit(0);
-}
-**************************************************************************/

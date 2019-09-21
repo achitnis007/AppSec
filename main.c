@@ -28,25 +28,24 @@ int main(int argc, char** argv)
 
     FILE * fp = fopen("./input_file.txt", "r");
     if (fp == NULL){
-		printf("Could not open input_file.txt to be spell checked\n");
-		exit(1);
+        printf("Could not open input_file.txt to be spell checked\n");
+	exit(1);
     }
-	else {
-		printf("Opened input_file.txt successfully\n");
-
-	}
+    else {
+	printf("Opened input_file.txt successfully\n");
+    }
 
     if (load_dictionary(dictionary_file, hashtable)){
-		num_misspelled = check_words(fp, hashtable, misspelled);
+	num_misspelled = check_words(fp, hashtable, misspelled);
     }
     else{
-		printf("Failed to load dictionary file - exiting without checking input file\n"); 
-		exit(1);
+	printf("Failed to load dictionary file - exiting without checking input file\n"); 
+	exit(1);
     }
 
     printf("Total misspelled words = [%d]\n", num_misspelled);
     for (int i=0; i < num_misspelled; i++){
-		printf("[%d]: %s\n", i+1, misspelled[i]);
+	printf("[%d]: %s\n", i+1, misspelled[i]);
     }
 
     exit(0);

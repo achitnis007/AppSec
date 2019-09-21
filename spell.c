@@ -15,8 +15,8 @@
 
 #define LINEBUFF 2048
 
-#define MY_TESTING_ON
-//#undef MY_TESTING_ON
+// #define MY_TESTING_ON
+#undef MY_TESTING_ON
 
 // in dictionary.h
 // maximum length for a word

@@ -18,8 +18,8 @@
 #define TRUE 1
 #define FALSE 0
 
-#define MY_TESTING_ON
-// #undef MY_TESTING_ON
+// #define MY_TESTING_ON
+#undef MY_TESTING_ON
 
 // avail in dictionary.h
 // maximum length for a word

@@ -14,6 +14,7 @@
 #include "dictionary.h"
 
 #define LINEBUFF 2048
+#define DICTLINEBUFF 1024
 
 #define TRUE 1
 #define FALSE 0
@@ -66,18 +67,12 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     int i=0;
     hashmap_t cur = NULL;
     // print hashtable i.e. dictionary
-    #ifdef MY_TESTING_ON
     printf("Printing dictionary from check_words() function\n");
-    #endif
     while (hashtable[i] != NULL){
         cur = hashtable[i]->next;
-        #ifdef MY_TESTING_ON
         printf("\nBucket [%d] - dict word(s) [%s], ", i, hashtable[i]->word);
-        #endif
 	while (cur != NULL){
-            #ifdef MY_TESTING_ON
 	    printf("[%s], ", cur->word );
-            #endif
 	    cur = cur->next;
 	}
 	i++;
@@ -114,7 +109,7 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
 		else
                     exit(1);
             }
-	    ip_word = strtok(NULL, " \t\r\n\v\f");
+	    ip_word = strtok(NULL, " \t\r\n");
 	}
     }
 	
@@ -323,7 +318,9 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 {
     // open dictionary_file is null, return FALSE
     FILE *fp;
-    char str[LENGTH+1];
+    char *dict_word;
+    // char str[LENGTH+1]; - used in prev implementation
+    char dict_line[DICTLINEBUFF];
     
     fp = fopen(dictionary_file, "r");
     if (fp == NULL){
@@ -355,39 +352,38 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
         // (node *) hashtable + i = NULL; 
     }
 
-    while (fgets(str, LENGTH+1, fp) != NULL){
-	// remove the pesky newline at the end if it exists
-	if ((str[0] != '\0') && (str[strlen(str) -1] == '\n')){
-            str[strlen(str) -1] = '\0';
-        }
-		
-        // allocate mem for a new node
-	node* new_node_p = (node *) malloc(sizeof(node));
+    while (fgets(dict_line, DICTLINEBUFF, fp) != NULL){
+        dict_word = strtok(dict_line, " \t\r\n");
+	while (dict_word != NULL){
+            // allocate mem for a new node
+	    node* new_node_p = (node *) malloc(sizeof(node));
 
-	// initialize the new node with word read from dict
-	// strcpy(new_node_p->word, str);
-	strncpy(new_node_p->word, str, (int) sizeof(new_node_p->word));
-	new_node_p->next = NULL;
+	    // initialize the new node with word read from dict
+	    // strcpy(new_node_p->word, dict_word);
+	    strncpy(new_node_p->word, dict_word, (int) sizeof(new_node_p->word));
+	    new_node_p->next = NULL;
 
-	// find the bucket id for the word using hash_function
-	int bucket = hash_function(str); 
+	    // find the bucket id for the word using hash_function
+	    int bucket = hash_function(dict_word); 
 		
-        #ifdef MY_TESTING_ON
-	// printf("Dictionary word is [%s] and bucket id is [%d]\n", str, bucket);
-        #endif
-	if ((bucket < 0) || (bucket >= HASH_SIZE)){
             #ifdef MY_TESTING_ON
-	    printf("hash_function returned an illegal index [%d] for dict word [%s]\n",bucket, str);
+	    // printf("Dictionary word is [%s] and bucket id is [%d]\n", dict_word, bucket);
             #endif
-	    return FALSE;
-	}
+	    if ((bucket < 0) || (bucket >= HASH_SIZE)){
+                #ifdef MY_TESTING_ON
+	        printf("hash_function returned an illegal index [%d] for dict word [%s]\n",bucket, dict_word);
+                #endif
+	        return FALSE;
+	    }
 
-	if (hashtable[bucket] == NULL){
-            hashtable[bucket] = new_node_p; 
-	}
-	else{
-	    new_node_p->next = hashtable[bucket];
-	    hashtable[bucket] = new_node_p;
+	    if (hashtable[bucket] == NULL){
+                hashtable[bucket] = new_node_p; 
+	    }
+	    else{
+	        new_node_p->next = hashtable[bucket];
+	        hashtable[bucket] = new_node_p;
+	    }
+	    dict_word = strtok(NULL, " \t\r\n");
 	}
     }
 

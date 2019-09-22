@@ -13,7 +13,7 @@
 #include <ctype.h>
 #include "dictionary.h"
 
-#define LINEBUFF 512
+#define LINEBUFF 2048
 #define DICTLINEBUFF 512
 
 #define TRUE 1

@@ -15,6 +15,9 @@
 
 #define LINEBUFF 2048
 
+#define TRUE 1
+#define FALSE 0
+
 #define MY_TESTING_ON
 // #undef MY_TESTING_ON
 

@@ -20,9 +20,6 @@
 
 #define MAX_MISSPELLED 1000
 
-#define TRUE 1
-#define FALSE 0
-
 typedef struct node
 {
     char word[LENGTH + 1];

@@ -23,6 +23,11 @@ int main(int argc, char** argv)
 
     hashmap_t hashtable[HASH_SIZE];
     char * misspelled[MAX_MISSPELLED];
+
+    // Assuming main() does not declare these arrays
+    // hashmap_t hashtable[0];
+    // char * misspelled[0];
+
     int num_misspelled = 0;
     char * dictionary_file = "./wordlist.txt";
 

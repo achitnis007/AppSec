@@ -15,10 +15,10 @@
 
 #define LINEBUFF 2048
 
-// #define MY_TESTING_ON
-#undef MY_TESTING_ON
+#define MY_TESTING_ON
+// #undef MY_TESTING_ON
 
-// in dictionary.h
+// avail in dictionary.h
 // maximum length for a word
 // (e.g., pneumonoultramicroscopicsilicovolcanoconiosis)
 // #define LENGTH 45
@@ -81,8 +81,8 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     }
     #endif
 	
-/*********
-    misspelled = (char* *) malloc(MAX_MISSPELLED * sizeof(char *));
+    /* **************************
+    misspelled[0] = (char *) malloc(MAX_MISSPELLED * sizeof(char *));
     if (misspelled != NULL){
         // initialize all string pointers to NULL
 	for (int i=0; i < MAX_MISSPELLED; i++){
@@ -92,13 +92,13 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     else {
         exit(1);
     }
-**********/
+    ***************************/
 	
     while (fgets(line, LINEBUFF, fp) != NULL){
         ip_word = strtok(line, " \t\r\n");
 	while (ip_word != NULL){
             if (!check_word(ip_word, hashtable)) {
-            // malloc space for this word and add to misspelled array    
+                // malloc space for this word and add to misspelled array    
 		misspelled[num_misspelled] = (char *) malloc(strlen(ip_word)+1);
 		// strcpy(misspelled[num_misspelled], ip_word);
 		if ((strncpy(misspelled[num_misspelled], ip_word, strlen(ip_word)+1)) != NULL){
@@ -249,7 +249,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
         #ifdef MY_TESTING_ON
 	printf("input word [%s], dict word at bucket # [%d] is [%s]\n", chkword, bucket, cursor->word);
         #endif
-        // if (!strcmp(chkword,cursor->word)){
+        // if (!strcmp(chkword,cursor->word))
         if (!strncmp(chkword, cursor->word, strlen(cursor->word))){
 	    if (strlen(chkword) == strlen(cursor->word)){
                 #ifdef MY_TESTING_ON
@@ -279,7 +279,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
-        // if (!strcmp(chkword_lower,cursor->word)) {
+        // if (!strcmp(chkword_lower,cursor->word)) 
         if (!strncmp(chkword_lower, cursor->word, strlen(cursor->word))){
 	    if (strlen(chkword_lower) == strlen(cursor->word)){
                 #ifdef MY_TESTING_ON
@@ -335,20 +335,21 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
         #endif
     }
 
+    /*********************************
     // allocate space for 2000 node* and initialize passed in hashtable
-/********
-    hashtable = malloc(sizeof(node *) * HASH_SIZE);
-	if (hashtable == NULL){
-            #ifdef MY_TESTING_ON
-	    printf("Malloc to allocate memory for hashtable failed - exiting program\n");
-            #endif
-	    exit(1);
-	}
-*********/
+    hashtable[0] = (node *) malloc(sizeof(node *) * HASH_SIZE);
+    if (hashtable == NULL){
+        #ifdef MY_TESTING_ON
+        printf("Malloc to allocate memory for hashtable failed - exiting program\n");
+        #endif
+        exit(1);
+    }
+    ********************************/
 	
     // initialize hashtable - array of linked lists to NULL
     for (int i=0; i<HASH_SIZE; i++){
         hashtable[i] = NULL; 
+        // (node *) hashtable + i = NULL; 
     }
 
     while (fgets(str, LENGTH+1, fp) != NULL){
@@ -391,22 +392,18 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	
     #ifdef MY_TESTING_ON
     printf("Printing dictionary hashtable from load_dictionary() before exiting\n");
-    #endif
     hashmap_t cur = NULL;
     int i = 0;
     while (hashtable[i] != NULL){
 	cur = hashtable[i]->next;
-        #ifdef MY_TESTING_ON
 	printf("\nBucket [%d] - dict word(s) [%s], ", i, hashtable[i]->word);
-        #endif
 	while (cur != NULL){
-            #ifdef MY_TESTING_ON
             printf("[%s], ", cur->word );
-            #endif
             cur = cur->next;
         }
 	i++;
     }
+    #endif
 
     return TRUE; 
 }

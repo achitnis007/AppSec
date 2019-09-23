@@ -8,5 +8,5 @@ language:
 compiler: 
   - gcc
 script:
-  - make clean
+  - make        
   - make test

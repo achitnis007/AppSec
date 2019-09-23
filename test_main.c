@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include "dictionary.h"
 
-#define DICTIONARY "wordlist.txt" // LONG LIST OF WORDS FOR EXTENSIVE TESTING
-#define TESTDICT "test_worlist.txt" // SHORT LIST OF WORDS FOR CONTROLLED TESTING
+#define DICTIONARY "./wordlist.txt" // LONG LIST OF WORDS FOR EXTENSIVE TESTING
+#define TESTDICT "./test_worlist.txt" // SHORT LIST OF WORDS FOR CONTROLLED TESTING
 
 // TEST # 1: 
 // TEST IF CERTAIN KNOWN WORDS ENDED UP IN CERTAIN BUCKETS TO ENSURE
@@ -131,7 +131,7 @@ START_TEST(test_check_short_word_surrounded_by_punct)
     char correct_word[6];
     correct_word[0] = '"';
     for(int i = 1; i < 4; i++)
-        correct_word[0] = 'A';
+        correct_word[i] = 'A';
     correct_word[4] = '"';
     correct_word[5] = '\0';
     ck_assert(check_word(correct_word, hashtable));

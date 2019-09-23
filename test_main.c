@@ -95,7 +95,7 @@ START_TEST(test_check_misspelled_words)
     expected[1] = "skyn";
     expected[2] = "betta";
     char *misspelled[MAX_MISSPELLED];
-    FILE *fp = fopen("test1.txt", "r");
+    FILE *fp = fopen("./test1.txt", "r");
     int num_misspelled = check_words(fp, hashtable, misspelled);
     ck_assert(num_misspelled == 3);
     bool test = strlen(misspelled[0]) == strlen(expected[0]);

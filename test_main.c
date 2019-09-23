@@ -4,6 +4,7 @@
 
 #define DICTIONARY "./wordlist.txt" // LONG LIST OF WORDS FOR EXTENSIVE TESTING
 #define TESTDICT "./test_worlist.txt" // SHORT LIST OF WORDS FOR CONTROLLED TESTING
+#define TESTINPUT "./test1.txt" // SHORT INPUT FILE WITH CONTROLLED WORDS
 
 // TEST # 1: 
 // TEST IF CERTAIN KNOWN WORDS ENDED UP IN CERTAIN BUCKETS TO ENSURE
@@ -95,7 +96,7 @@ START_TEST(test_check_misspelled_words)
     expected[1] = "skyn";
     expected[2] = "betta";
     char *misspelled[MAX_MISSPELLED];
-    FILE *fp = fopen("./test1.txt", "r");
+    FILE *fp = fopen(TESTINPUT, "r");
     int num_misspelled = check_words(fp, hashtable, misspelled);
     ck_assert(num_misspelled == 3);
     bool test = strlen(misspelled[0]) == strlen(expected[0]);

@@ -19,6 +19,27 @@
 #define TRUE 1
 #define FALSE 0
 
+/**
+ * Checks if word passed in is made of printable ascii characters.
+ */
+/**
+ * Inputs:
+ *  word:       string to be validated if printable
+ *            
+ * Returns:
+ *  bool:       true only if all chars are printable ascii
+ *              false if even a single char is non-printable
+ * Example:
+ *  bool is_printable = is_printable_ascii(parsed_word);
+ **/
+bool is_printable_ascii(const char * word)
+{
+    for (int i=0; i<strlen(word); i++){
+	if ((word[i] < 33) || (word[i] > 126))
+	    return false;
+    }
+    return true;
+}
 
 
 /**
@@ -45,7 +66,9 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     char trimmed_word[LENGTH+1];
     char line[LINEBUFF];
     char* ip_word;
-    int num_misspelled = 0;    
+    int num_misspelled = 0;
+    int trimmed_word_len = 0;
+    bool misspelled_not_in_list = true;
     
     int i=0;
     hashmap_t cur = NULL;
@@ -63,29 +86,48 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     while (fgets(line, LINEBUFF, fp) != NULL){
         ip_word = strtok(line, " \t\r\n");
 		while (ip_word != NULL){
-			if (!check_word(ip_word, hashtable)) {
+			if (is_printable_ascii(ip_word) && !check_word(ip_word, hashtable)) {
 				// strip punctuation from front & back
-				if (ispunct(ip_word[0]) && ispunct(ip_word[strlen(ip_word)-1]))
-				    strncpy(trimmed_word, ip_word+1, strlen(ip_word)-2);
-				else if (ispunct(ip_word[0]))
-				    strncpy(trimmed_word, ip_word+1, strlen(ip_word)-1);
-				else if (ispunct(ip_word[strlen(ip_word)-1]))
-				    strncpy(trimmed_word, ip_word, strlen(ip_word)-1);
-				else
-				    strncpy(trimmed_word, ip_word, strlen(ip_word));
+				if (ispunct(ip_word[0]) && ispunct(ip_word[strlen(ip_word)-1])){
+				    trimmed_word_len = strlen(ip_word)-2;
+				    strncpy(trimmed_word, ip_word+1, trimmed_word_len);
+				}
+				else if (ispunct(ip_word[0])){
+				    trimmed_word_len = strlen(ip_word)-1;
+				    strncpy(trimmed_word, ip_word+1, trimmed_word_len);
+				}
+				else if (ispunct(ip_word[strlen(ip_word)-1])){
+				    trimmed_word_len = strlen(ip_word)-1;
+				    strncpy(trimmed_word, ip_word, trimmed_word_len);
+				}
+				else {
+				    trimmed_word_len = strlen(ip_word);
+				    strncpy(trimmed_word, ip_word, trimmed_word_len);
+				}
 
                                 // null terminate the string copied
-				trimmed_word[strlen(trimmed_word)] = '\0';
+				trimmed_word[trimmed_word_len] = '\0';
 
-				// malloc space for this trimmed word and add to misspelled array    
-				misspelled[num_misspelled] = (char *) malloc(strlen(trimmed_word)+1);
-				if ((strncpy(misspelled[num_misspelled], trimmed_word, strlen(trimmed_word)+1)) != NULL){
-				    // printf("Input Word [%s] has length [%d]\n", ip_word, (int) strlen(ip_word));
-				    // printf("misspelled[%d] is [%s] has length [%d]\n", num_misspelled, misspelled[num_misspelled], (int) strlen(misspelled[num_misspelled]));
-				    num_misspelled++;
+				// check if misspelled word is already in misspelled array
+				misspelled_not_in_list = true;
+				for (int i=0; i<num_misspelled; i++){
+				    if (!strncmp(misspelled[i], trimmed_word, trimmed_word_len)){
+			               misspelled_not_in_list = false;
+				       break;
+				    }
 				}
-				else
-				    exit(1);
+
+			        if (misspelled_not_in_list){	
+				    // malloc space for this trimmed word and add to misspelled array    
+				    misspelled[num_misspelled] = (char *) malloc(strlen(trimmed_word)+1);
+				    if ((strncpy(misspelled[num_misspelled], trimmed_word, strlen(trimmed_word)+1)) != NULL){
+				        // printf("Input Word [%s] has length [%d]\n", ip_word, (int) strlen(ip_word));
+				        // printf("misspelled[%d] is [%s] has length [%d]\n", num_misspelled, misspelled[num_misspelled], (int) strlen(misspelled[num_misspelled]));
+				        num_misspelled++;
+				    }
+				    else
+				        exit(1);
+				}
 			}
 			ip_word = strtok(NULL, " \t\r\n");
 		}

@@ -35,9 +35,12 @@
 bool is_printable_ascii(const char * word)
 {
     for (int i=0; i<strlen(word); i++){
-	if ((word[i] < 33) || (word[i] > 126))
+	if ((word[i] < 33) || (word[i] == 127) || (word[i] == 255)){
+            // printf("checking for is_printable_ascc() [%s] with length [%ld] is non-printable\n",word, strlen(word));
 	    return false;
+	}
     }
+    // printf("checking for is_printable_ascc() [%s] is printable\n",word);
     return true;
 }
 
@@ -86,7 +89,10 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     while (fgets(line, LINEBUFF, fp) != NULL){
         ip_word = strtok(line, " \t\r\n");
 		while (ip_word != NULL){
-			if (is_printable_ascii(ip_word) && !check_word(ip_word, hashtable)) {
+			// if (is_printable_ascii(ip_word) && !check_word(ip_word, hashtable)) {
+			if (!check_word(ip_word, hashtable)) {
+			// if (!check_word(ip_word, hashtable)) {
+				// printf("[%s] not found in dictionary\n",ip_word);
 				// strip punctuation from front & back
 				if (ispunct(ip_word[0]) && ispunct(ip_word[strlen(ip_word)-1])){
 				    trimmed_word_len = strlen(ip_word)-2;
@@ -174,11 +180,11 @@ bool check_word(const char* word, hashmap_t hashtable[])
         }
 	if (num_cnt == word_len){
 	    // printf("Word being checked [%s] has [%d] chars - spellcheck passed since it's numeric\n",word, word_len);    
-	    return TRUE;
+	    return true;
 	}
 	else{
 	    // printf("Word being checked [%s] has [%d] chars - exceeds max word length of [%d]\n",word, word_len, LENGTH);
-	    return FALSE;
+	    return false;
 	}
     }
 
@@ -191,24 +197,24 @@ bool check_word(const char* word, hashmap_t hashtable[])
 		num_cnt++;
 	}
 	else if (ispunct(word[i])){
-        	if ((i==0) && (i==word_len-1)) return TRUE;
-		if (i == 0) punct_begin = TRUE;
-		if (i == word_len-1) punct_end = TRUE;
+        	if ((i==0) && (i==word_len-1)) return true;
+		if (i == 0) punct_begin = true;
+		if (i == word_len-1) punct_end = true;
 	}
-	else if ((word[i] < 32) || (word[i] == 127)){
-		return FALSE;
+	else if ((word[i] < 32) || (word[i] == 127) || (word[i] == 255)){
+		return false;
 	}
     }
 
     // word is a number - passes spell check automatically
     if (num_cnt == word_len) {
 	// printf("Word is a numeric string - spell check passed [%s]\n", word);
-        return TRUE;
+        return true;
     }
 
     // word is made of alphabets - copy to chkword for dir lookup
-    if (alpha_cnt == word_len)
-	strncpy(chkword, word, (int) sizeof(chkword));
+    // if (alpha_cnt == word_len)
+    strncpy(chkword, word, (int) sizeof(chkword));
 
     // check if first char is a punctuation mark - if so, copy from 2nd char to end
     // else copy the entire word to chkword
@@ -231,7 +237,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
     
     if ((bucket < 0) || (bucket >= HASH_SIZE)){    
         // printf("hash_function returned an illegal index [%d] for input word [%s]\n",bucket, chkword);
-        return FALSE;
+        return false;
     }
 
     cursor = hashtable[bucket];
@@ -239,7 +245,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
 	// printf("input word [%s], dict word at bucket # [%d] is [%s]\n", chkword, bucket, cursor->word);
         if (strncmp(chkword, cursor->word, strlen(cursor->word)) == 0){
 	    // printf("Input Word [%s], stripped word [%s] matched dict word [%s] - correctly spelled\n", word, chkword, cursor->word);    
-	    return TRUE;
+	    return true;
 	}
 	cursor = cursor->next;
     }
@@ -254,21 +260,21 @@ bool check_word(const char* word, hashmap_t hashtable[])
     bucket = hash_function(chkword_lower);
     if ((bucket < 0) || (bucket >= HASH_SIZE)){        
         // printf("hash_function returned an illegal index [%d] for lowercase input word [%s]\n",bucket, chkword_lower);
-        return FALSE;
+        return false;
     }
 
     cursor = hashtable[bucket];
     while (cursor != NULL){
         if (strncmp(chkword_lower, cursor->word, strlen(cursor->word)) == 0){
 	    // printf("Input Word [%s] in lower case [%s] found in dict [%s] - correctly spelled\n", chkword, chkword_lower, cursor->word);             
-	    return TRUE;
+	    return true;
 	}
 	cursor = cursor->next;
     }
 
     // printf("***** Input Word [%s], stripped word [%s], lower case word [%s] did not match dict word - incorrectly spelled *****\n", word, chkword, chkword_lower);    
 
-    return FALSE;
+    return false;
 }
 
 

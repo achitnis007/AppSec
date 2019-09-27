@@ -349,3 +349,84 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 	
     return TRUE; 
 }
+
+
+/**
+ * Frees the hashtable used to store dictionary words for look-up
+ */
+/**
+ * Inputs:
+ *  hashtable: The hash table to be freed.
+ *            
+ * Returns:
+ *  int:       Number of dictionary words (nodes) freed
+ *
+ * Modifies:
+ *  hashtable: Memory allocated to hashtable should be freed
+ *
+ * Example:
+ *  int dict_words = free_dictionary(hashtable);
+ **/
+int free_dictionary(hashmap_t hashtable[])
+{
+    int dict_words_freed = 0;
+
+    // hashmap_t is alias fpr node *
+    hashmap_t cur_node = NULL, next_node = NULL;
+
+    for (int i=0; i<HASH_SIZE; i++){
+        if(hashtable[i] == NULL)
+            continue;
+        while(hashtable[i]->next != NULL){
+	    cur_node = hashtable[i];
+            next_node = cur_node->next;
+            while (next_node->next != NULL){
+                cur_node = next_node; 
+                next_node = next_node->next;            
+	    }
+            cur_node->next = NULL;
+            free(next_node);
+            next_node = NULL;
+            dict_words_freed++;
+        }
+        free(hashtable[i]);
+        hashtable[i] = NULL;
+        dict_words_freed++;
+    }
+
+    return dict_words_freed;
+}
+
+
+/**
+ * Frees the misspelled array of strings used to save misspelled words
+ */
+/**
+ * Inputs:
+ *  misspelled array:  misspelled array to be freed.
+ *            
+ * Returns:
+ *  int:               Number of misspelled words freed
+ *
+ * Modifies:
+ *  misspelled:        Memory allocated to misspelled string array should be freed
+ *
+ * Example:
+ *  int misspelled_words = free_misspelled_list(misspelled);
+ **/
+int free_misspelled_list(char * misspelled[])
+{
+    int i = 0, misspelled_words_freed = 0;
+
+    while (misspelled[i] != NULL){
+        free(misspelled[i]); 
+        misspelled[i] = NULL;
+        misspelled_words_freed++;
+        if (++i < MAX_MISSPELLED)
+            continue;
+        else
+            break;
+    }
+
+    return misspelled_words_freed;
+}

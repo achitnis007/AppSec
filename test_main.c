@@ -166,6 +166,28 @@ START_TEST(test_check_word_buffer_overflow)
 }
 END_TEST
 
+// TEST # 8:
+// ALL NUMERIC STRING SHOULD PASS SPELL CHECK
+START_TEST(test_check_numeric_string)
+{
+    hashmap_t hashtable[HASH_SIZE];
+    load_dictionary(DICTIONARY, hashtable);
+    char * numeric_str = "123456789012345678901234567890";
+    ck_assert(check_word(numeric_str, hashtable));
+}
+END_TEST
+
+// TEST # 9:
+// Non-english alphabets mixed with english alphabets
+START_TEST(test_check_non_english_word)
+{
+    hashmap_t hashtable[HASH_SIZE];
+    load_dictionary(DICTIONARY, hashtable);
+    char * non_english_word = "¡Bienvenido_al_español";
+    ck_assert(!check_word(non_english_word, hashtable));
+}
+END_TEST
+
 // DEFINE THE TEST SUITE, ADD UNIT TESTS TO TEST CASE SUITE
 Suite *
 check_word_suite(void)
@@ -174,13 +196,26 @@ check_word_suite(void)
     TCase * check_word_case;
     suite = suite_create("check_word");
     check_word_case = tcase_create("Core");
+
+    // 1
     tcase_add_test(check_word_case, test_check_load_dictionary);
+    // 2
     tcase_add_test(check_word_case, test_check_punctuated_valid_invalid_words);
+    // 3
     tcase_add_test(check_word_case, test_check_misspelled_words);
+    // 4
     tcase_add_test(check_word_case, test_check_margin_case_invalid_word);
+    // 5
     tcase_add_test(check_word_case, test_check_short_word_surrounded_by_punct);
+    // 6
     tcase_add_test(check_word_case, test_check_single_char_valid_input);
+    // 7
     tcase_add_test(check_word_case, test_check_word_buffer_overflow);
+    // 8
+    tcase_add_test(check_word_case, test_check_numeric_string);
+    // 9
+    tcase_add_test(check_word_case, test_check_non_english_word);
+
     suite_add_tcase(suite, check_word_case);
 
     return suite;
@@ -188,7 +223,7 @@ check_word_suite(void)
 
 // main() TO RUN THE TEST SUITE
 int
-main(void)
+main(int argc, char **argv)
 {
     int failed;
     Suite *suite;

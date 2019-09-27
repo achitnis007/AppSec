@@ -88,6 +88,42 @@ bool check_word(const char* word, hashmap_t hashtable[]);
 bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[]);
 
 /**
+ * Frees the hashtable used to store dictionary words for look-up
+ */
+/**
+ * Inputs:
+ *  hashtable: The hash table to be freed.
+ *
+ * Returns:
+ *  int:       Number of dictionary words (nodes) freed
+ *
+ * Modifies:
+ *  hashtable: Memory allocated to hashtable should be freed
+ *
+ * Example:
+ *  int dict_words = free_dictionary(hashtable);
+ **/
+int free_dictionary(hashmap_t hashtable[]);
+
+/**
+ * Frees the misspelled array of strings used to save misspelled words
+ */
+/**
+ * Inputs:
+ *  misspelled array:  misspelled array to be freed.
+ *
+ * Returns:
+ *  int:               Number of misspelled words freed
+ *
+ * Modifies:
+ *  misspelled:        Memory allocated to misspelled string array should be freed
+ *
+ * Example:
+ *  int misspelled_words = free_misspelled_list(misspelled);
+ **/
+int free_misspelled_list(char * misspelled[]);
+
+/**
  * Already implemented in dictionary.c
  **/
 int hash_function(const char* word);

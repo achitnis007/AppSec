@@ -25,22 +25,36 @@ int main(int argc, char** argv)
     char * misspelled[MAX_MISSPELLED];
 
     int num_misspelled = 0;
-    char * dictionary_file = "./wordlist.txt";
+    int dict_words = 0, misspelled_words = 0;
 
-    FILE * fp = fopen("./input_file.txt", "r");
+    // char * dictionary_file = "./wordlist.txt";
+    // char * input_file = "./input_file.txt";
+
+    if (argc != 3){
+        printf("Exiting: Please run spell_check as $spell_check <input file name> <dictionary file name>\n");
+	exit(1);
+    }
+
+    // printf("Program Name: %s\n",argv[0]);
+    // printf("Input File: %s\n",argv[1]);
+    // printf("Dictionary File: %s\n",argv[2]);
+
+    // input file from command line
+    FILE * fp = fopen(argv[1], "r");
     if (fp == NULL){
-        printf("Could not open input_file.txt to be spell checked\n");
+        printf("Could not open input file [%s] to be spell checked\n", argv[1]);
 	exit(1);
     }
     else {
-	printf("Opened input_file.txt successfully\n");
+        printf("Opened input file [%s] to be spell checked sucessfully\n", argv[1]);
     }
 
-    if (load_dictionary(dictionary_file, hashtable)){
+    // dictionary file from command line
+    if (load_dictionary(argv[2], hashtable)){
 	num_misspelled = check_words(fp, hashtable, misspelled);
     }
     else{
-	printf("Failed to load dictionary file - exiting without checking input file\n"); 
+	printf("Failed to load dictionary file [%s] -  exiting without checking input file [%s]\n", argv[2], argv[1]); 
 	exit(1);
     }
 
@@ -48,6 +62,15 @@ int main(int argc, char** argv)
     for (int i=0; i < num_misspelled; i++){
 	printf("[%d]: %s\n", i+1, misspelled[i]);
     }
+
+    dict_words = free_dictionary(hashtable);
+    printf ("Dictionary hashtable - total words freed [%d]\n", dict_words);
+
+    misspelled_words = free_misspelled_list(misspelled);
+    printf ("Total misspelled words freed [%d]\n", misspelled_words);
+
+    if (num_misspelled != misspelled_words)
+	printf("Number of misspelled words detected [%d] != [%d] misspelled words freed\n", num_misspelled, misspelled_words);
 
     exit(0);
 }

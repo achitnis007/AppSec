@@ -72,5 +72,7 @@ int main(int argc, char** argv)
     if (num_misspelled != misspelled_words)
 	printf("Number of misspelled words detected [%d] != [%d] misspelled words freed\n", num_misspelled, misspelled_words);
 
+    fclose(fp);
+
     exit(0);
 }

@@ -83,6 +83,11 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
     int ip_word_len = 0;
     bool misspelled_not_in_list = true;
     
+    // initialize misspelled array of strings to NULL
+    for (int i=0; i<MAX_MISSPELLED; i++){
+        misspelled[i] = NULL; 
+    }
+
     int i=0;
     hashmap_t cur = NULL;
 	// printf("Printing dictionary from check_words() function\n");
@@ -376,11 +381,11 @@ bool load_dictionary(const char* dictionary_file, hashmap_t hashtable[])
 			}
 
 			if (hashtable[bucket] == NULL){
-					hashtable[bucket] = new_node_p; 
+			    hashtable[bucket] = new_node_p; 
 			}
 			else{
-				new_node_p->next = hashtable[bucket];
-				hashtable[bucket] = new_node_p;
+			    new_node_p->next = hashtable[bucket];
+			    hashtable[bucket] = new_node_p;
 			}
 			dict_word = strtok(NULL, " \t\r\n");
 		}
@@ -459,14 +464,11 @@ int free_misspelled_list(char * misspelled[])
 {
     int i = 0, misspelled_words_freed = 0;
 
-    while (misspelled[i] != NULL){
+    while ((i < MAX_MISSPELLED) && (misspelled[i] != NULL)){
         free(misspelled[i]); 
         misspelled[i] = NULL;
         misspelled_words_freed++;
-        if (++i < MAX_MISSPELLED)
-            continue;
-        else
-            break;
+        i++;
     }
 
     return misspelled_words_freed;

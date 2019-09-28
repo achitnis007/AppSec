@@ -72,6 +72,7 @@ int main(int argc, char** argv)
     if (num_misspelled != misspelled_words)
 	printf("Number of misspelled words detected [%d] != [%d] misspelled words freed\n", num_misspelled, misspelled_words);
 
+    // missing fclose was pointed out by Valgrind as 552 reachable bytes after program close
     fclose(fp);
 
     exit(0);

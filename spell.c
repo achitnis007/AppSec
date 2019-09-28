@@ -464,6 +464,8 @@ int free_misspelled_list(char * misspelled[])
 {
     int i = 0, misspelled_words_freed = 0;
 
+    // added a check for i < MAX_MISSPELLED to prevent an invalid free outside the 
+    // array limits based on Valgrind finding
     while ((i < MAX_MISSPELLED) && (misspelled[i] != NULL)){
         free(misspelled[i]); 
         misspelled[i] = NULL;
